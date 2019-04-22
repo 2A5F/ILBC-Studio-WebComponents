@@ -1,0 +1,54 @@
+<template ilbc-editor>
+    <style>
+        #content{
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            max-width: 100%;
+            padding: 10px;
+            outline: none;
+            box-sizing: border-box;
+            overflow-y: scroll;
+        }
+    </style>
+    <div id=content contenteditable=true></div>
+</template>
+<script>
+    class Editor extends HTMLElement {
+        static get observedAttributes() {
+            return ['defaultvalue', 'font', 'size'];
+        }
+
+        constructor() {
+            super()
+
+            this.first = true
+
+            const template = document.currentScript.ownerDocument.querySelector('template[ilbc-editor]').content
+            const shadowRoot = this.attachShadow({ mode: 'open' }).appendChild(template.cloneNode(true))
+        }
+
+        getContent() {
+            return this.shadowRoot.querySelector('#content').innerText
+        }
+
+        setFont(font){
+            this.shadowRoot.querySelector('#content').style.fontFamily = font
+        }
+
+        setSize(size){
+            this.shadowRoot.querySelector('#content').style.fontSize = size
+        }
+
+        attributeChangedCallback(name, oldValue, newValue){
+            if (this.first && name == 'defaultvalue') {
+                this.shadowRoot.querySelector('content').innerText = newValue == null ? '' : newValue
+            } else if (name == 'font') {
+                this.setFont(newValue == null ? '' : newValue)
+            } else if (name == 'size') {
+                this.setSize(newValue == null ? '' : newValue)
+            }
+        }
+    }
+    customElements.define('ilbc-editor', Editor)
+</script>

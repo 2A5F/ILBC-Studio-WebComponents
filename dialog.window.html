@@ -1,0 +1,145 @@
+<template ilbc-dialog-window>
+    <style>
+        dialog{
+            top: 50px;
+            border: 1px solid #565656;
+            position: fixed;
+            padding: 5px;
+        }
+        #title{
+            border-bottom: 1px solid #565656;
+            height: 25px;
+            display: flex;
+            flex-direction: row;
+            padding-bottom: 2px;
+            cursor: default;
+            user-select: none;
+        }
+        #title>span{
+            flex: 1;
+            padding-right: 10px;
+        }
+        #close-but{
+            width: 46px;
+            height: 30px;
+            margin-top: -4px;
+            margin-right: -4px;
+        }
+        #close-but::before{
+            content: '';
+            display: block;
+            height: 100%;
+            width: 100%;
+            background: #454545;
+            mask-size: 23.1%;
+            -webkit-mask-size: 23.1%;
+            mask: url("data:image/svg+xml;charset=utf-8,%3Csvg width='11' height='11' viewBox='0 0 11 11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.279 5.5L11 10.221l-.779.779L5.5 6.279.779 11 0 10.221 4.721 5.5 0 .779.779 0 5.5 4.721 10.221 0 11 .779 6.279 5.5z' fill='%23000'/%3E%3C/svg%3E") no-repeat 50% 50%;
+            -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg width='11' height='11' viewBox='0 0 11 11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.279 5.5L11 10.221l-.779.779L5.5 6.279.779 11 0 10.221 4.721 5.5 0 .779.779 0 5.5 4.721 10.221 0 11 .779 6.279 5.5z' fill='%23000'/%3E%3C/svg%3E") no-repeat 50% 50%;
+        }
+        #close-but:hover{
+            background: rgba(232,17,35,.9)
+        }
+        #close-but:hover::before{
+            background: #fcfcfc;
+        }
+    </style>
+    <dialog>
+        <div id=title>
+            <span></span>
+            <div id=close-but></div>
+        </div>
+        <slot></slot>
+    </dialog>
+</template>
+<script>
+    class DialogWindow extends HTMLElement {
+        static get observedAttributes() {
+            return ['title'];
+        }
+
+        constructor() {
+            super()
+
+            const template = document.currentScript.ownerDocument.querySelector('template[ilbc-dialog-window]').content
+            const shadowRoot = this.attachShadow({ mode: 'open' }).appendChild(template.cloneNode(true))
+
+            this.dialog = this.shadowRoot.querySelector('dialog')
+
+            this.left = 0
+            this.top = 0
+            this.start_left = 0
+            this.start_top = 0
+
+            let x = 0
+            let y = 0
+            let on_drag = false
+
+            this.shadowRoot.querySelector('#close-but').addEventListener('click', ()=>{
+                this.close()
+            })
+
+            this.shadowRoot.querySelector('#title>span').addEventListener('mousedown', (e)=>{
+                on_drag = true
+                x = e.x
+                y = e.y
+                this.start_left = this.left
+                this.start_top = this.top
+            })
+
+            document.addEventListener('mouseup', (e) => {
+                if(on_drag){
+                    on_drag = false
+                    x = 0
+                    y = 0
+                }
+            })
+
+            document.addEventListener('mousemove', (e) => {
+                if(on_drag){
+                    this.update_pos(e.x - x, e.y - y)
+                }
+            })
+
+            this.dialog.style.transform = `translate(${this.left}px, ${this.top}px)`
+        }
+
+        update_pos(x, y) {
+            this.left = this.start_left + x
+            this.top = this.start_top + y
+
+            this.dialog.style.transform = `translate(${this.left}px, ${this.top}px)`
+        }
+
+        set_pos(x, y) {
+            this.left = x
+            this.top = y
+
+            this.dialog.style.transform = `translate(${this.left}px, ${this.top}px)`
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (name == 'title') {
+                if (newValue == null) {
+                    this.shadowRoot.querySelector('#title>span').innerText = ''
+                } else {
+                    this.shadowRoot.querySelector('#title>span').innerText = newValue
+                }
+            }
+        }
+
+        show(){
+            this.set_pos(0, 0)
+            this.shadowRoot.querySelector('dialog').show()
+        }
+
+        showModal(){
+            this.set_pos(0, 0)
+            this.shadowRoot.querySelector('dialog').showModal()
+        }
+
+        close(){
+            this.shadowRoot.querySelector('dialog').close()
+        }
+    }
+    customElements.define('ilbc-dialog-window', DialogWindow)
+</script>

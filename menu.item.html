@@ -1,0 +1,105 @@
+<template ilbc-menu-item>
+    <style>
+        #root{
+            user-select: none;
+        }
+        
+        #root.root>section{
+            height: 0;
+            position: absolute;
+            display: none;
+        }
+        #root.root.opened.hovered>section{
+            display: block;
+        }
+        #root.root>section>div{
+            background: #fff;
+            border: 1px solid #565656;
+            padding: 1px;
+        }
+
+        #root:not(.root)>#name{
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        #root:not(.root)>#name:hover{
+            background: rgb(179, 218, 231);
+        }
+    </style>
+    <article id=root>
+        <div id=name></div>
+        <section>
+            <div><slot></slot></div>
+        </section>
+    </article>
+</template>
+<script>
+    class MenuItem extends HTMLElement {
+        static get observedAttributes() {
+            return ['isopened', 'opendid', 'name', 'onclick'];
+        }
+
+        constructor() {
+            super()
+
+            const template = document.currentScript.ownerDocument.querySelector('template[ilbc-menu-item]').content
+            const shadowRoot = this.attachShadow({ mode: 'open' }).appendChild(template.cloneNode(true))
+
+            if(this.parentElement.nodeName == 'ILBC-MENU'){
+                this.shadowRoot.querySelector('#root').classList.add('root')
+                if (typeof this.parentElement.reg == 'function'){
+                    this.id = this.parentElement.reg(this, 
+                        f => this.shadowRoot.querySelector('#root').addEventListener('click', f),
+                        f => this.shadowRoot.querySelector('#root').addEventListener('mouseenter', f)
+                    )
+                }
+            }
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (name == 'name') {
+                if (newValue == null) {
+                    this.shadowRoot.querySelector('#name').innerText = ''
+                } else {
+                    this.shadowRoot.querySelector('#name').innerText = newValue
+                }
+            } else if (name == 'isopened') {
+                if (newValue != null || newValue == 'true') {
+                    this.shadowRoot.querySelector('#root').classList.add('opened')
+                } else {
+                    this.shadowRoot.querySelector('#root').classList.remove('opened')
+                }
+            } else if (name == 'opendid') {
+                const i = parseInt(newValue)
+                if (i == this.id) {
+                    this.shadowRoot.querySelector('#root').classList.add('hovered')
+                } else {
+                    this.shadowRoot.querySelector('#root').classList.remove('hovered')
+                }
+            } else if (name = 'onclick') {
+                if (newValue == null) {
+                    this.unonclick(oldValue)
+                } else {
+                    this.onclick(newValue)
+                }
+            }
+        }
+
+        onclick(cb) {
+            if (typeof cb == 'string') {
+                cb = window[cb]
+            }
+            if(typeof cb != 'function') return
+            this.shadowRoot.querySelector('#name').addEventListener('click', cb)
+        }
+
+        unonclick(cb){
+            if (typeof cb == 'string') {
+                cb = window[cb]
+            }
+            if (typeof cb != 'function') return
+            this.shadowRoot.querySelector('#name').removeEventListener('click', cb)
+        }
+    }
+    customElements.define('ilbc-menu-item', MenuItem)
+</script>

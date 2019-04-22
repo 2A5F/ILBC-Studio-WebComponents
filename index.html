@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <title>ILBC Studio</title>
+    <script>
+        function option_open() {
+            const option_win = document.querySelector('#option-win')
+            option_win.show()
+        }
+        function option_close() {
+            const option_win = document.querySelector('#option-win')
+            option_win.close()
+        }
+        function to_save() {
+            const editor = document.querySelector('ilbc-editor')
+            const blob = new Blob([editor.getContent()], {
+                type: 'text/plain'
+            })
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = '未命名文件'
+            a.click()
+        }
+        function change_font(){
+            const font = document.querySelector('#font')
+            const size = document.querySelector('#size')
+            const editor = document.querySelector('ilbc-editor')
+            editor.setFont(font.value)
+            editor.setSize(size.value)
+
+            option_close()
+        }
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const yes = document.querySelector('#buts>.yes')
+            const no = document.querySelector('#buts>.no')
+
+            yes.addEventListener('click', change_font)
+            no.addEventListener('click', option_close)
+        })
+    </script>
+    <link rel=import href=./menu.html>
+    <link rel=import href=./menu.item.html>
+    <link rel=import href=./editor.html>
+    <link rel=import href=./dialog.window.html>
+</head>
+
+<body>
+    <style>
+        #root {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-rows: 30px calc(100% - 30px);
+        }
+    </style>
+    <div id=root>
+        <ilbc-menu>
+            <ilbc-menu-item name=文件>
+                <ilbc-menu-item name=保存 onclick=to_save></ilbc-menu-item>
+            </ilbc-menu-item>
+            <ilbc-menu-item name=工具>
+                <ilbc-menu-item name=选项 onclick=option_open></ilbc-menu-item>
+            </ilbc-menu-item>
+        </ilbc-menu>
+        <ilbc-editor id=editor></ilbc-editor>
+    </div>
+    <ilbc-dialog-window id=option-win title='选项'>
+        <style>
+            #options {
+                display: grid;
+                height: 250px;
+                width: 380px;
+                grid-template-columns: 60% [last-col] auto [last-col-end];
+                grid-template-rows: auto [last-row] 30px [last-row-end];
+                justify-items: stretch;
+                align-items: stretch;
+                margin-bottom: 5px;
+                border-bottom: 1px solid #565656;
+            }
+    
+            #options>article {
+                display: grid;
+                grid-template-rows: 30px 30px auto;
+                justify-items: stretch;
+                align-items: stretch;
+                padding: 5px;
+            }
+    
+            #options>article>p {
+                margin: 0;
+                height: 100%;
+                display: flex;
+                justify-content: left;
+                align-items: center;
+            }
+    
+            #options>#buts {
+                grid-column-start: last-col;
+                grid-column-end: last-col-end;
+                grid-row-start: last-row;
+                grid-row-end: last-row-end;
+                grid-template-columns: 50% 50%;
+                grid-template-rows: auto;
+                padding: 0;
+            }
+    
+            #options>#buts>button {
+                background: transparent;
+                border: none;
+                outline: none;
+            }
+    
+            #options>#buts>button:hover {
+                background: #eeeeee;
+            }
+        </style>
+        <section id=options>
+            <article>
+                <p>字体</p>
+                <select id=font required>
+                    <option value='' selected>默认</option>
+                    <option value=Aria>Aria</option>
+                    <option value=宋体>宋体</option>
+                    <option value=微软雅黑>微软雅黑</option>
+                </select>
+            </article>
+            <article>
+                <p>大小</p>
+                <select id=size required>
+                    <option value=14px>14</option>
+                    <option value=12px>12</option>
+                    <option value=16px>16</option>
+                    <option value=20px selected>20</option>
+                    <option value=24px>24</option>
+                    <option value=30px>30</option>
+                    <option value=40px>40</option>
+                    <option value=50px>50</option>
+                    <option value=60px>60</option>
+                </select>
+            </article>
+            <article id=buts>
+                <button class=yes>确定</button>
+                <button class=no>取消</button>
+            </article>
+        </section>
+    </ilbc-dialog-window>
+</body>
+
+</html>

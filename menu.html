@@ -1,0 +1,89 @@
+<template ilbc-menu>
+    <style>
+        #root{
+            display: flex;
+            flex-direction: row;
+            height: 25px;
+            border-bottom: 1px solid #232323;
+            cursor: default;
+            user-select: none;
+        }
+        #space{
+            flex: 1;
+        }
+        nav{
+            display: flex;
+            flex-direction: row;
+            height: 25px;
+        }
+        nav>::slotted(*){
+            padding-left: 5px;
+            padding-right: 5px;
+            height: 20px;
+        }
+        nav>::slotted(*:hover){
+            border-bottom: 1px solid #232323;
+        }
+    </style>
+    <div id=root>
+        <nav><slot></slot></nav>
+        <div id=space></div>
+    </div>
+</template>
+<script>
+    class Menu extends HTMLElement {
+        constructor(){
+            super()
+
+            this._isopend = false
+            this.now_hover_item = -1
+            this.items = []
+            
+            const template = document.currentScript.ownerDocument.querySelector('template[ilbc-menu]').content
+            const shadowRoot = this.attachShadow({ mode: 'open' }).appendChild(template.cloneNode(true))
+
+            let isin = false
+            this.shadowRoot.querySelector('nav').addEventListener('mouseenter', () => {
+                isin = true
+            })
+            this.shadowRoot.querySelector('nav').addEventListener('mouseleave', ()=>{
+                isin = false
+            })
+            document.addEventListener('click', ()=>{
+                if(!isin){
+                    this.isopend = false
+                }
+            })
+        }
+
+        get isopend() { return this._isopend }
+        set isopend(value) { 
+            this._isopend = value
+            for (const item of this.items) {
+                if (value) {
+                    item.setAttribute('isopened', '')
+                } else {
+                    item.removeAttribute('isopened')
+                }
+                item.setAttribute('opendid', this.now_hover_item)
+            }
+        }
+
+        reg(item, click, enter) {
+            this.items.push(item)
+            const i = this.items.length - 1
+            click(()=>{
+                this.now_hover_item = i
+                this.isopend = true
+            })
+            enter(()=>{
+                this.now_hover_item = i
+                for (const item of this.items) {
+                    item.setAttribute('opendid', this.now_hover_item)
+                }
+            })
+            return i
+        }
+    }
+    customElements.define('ilbc-menu', Menu)
+</script>
