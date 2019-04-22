@@ -54,7 +54,7 @@
 <script>
     class DialogWindow extends HTMLElement {
         static get observedAttributes() {
-            return ['title'];
+            return ['title-text'];
         }
 
         constructor() {
@@ -118,7 +118,7 @@
         }
 
         attributeChangedCallback(name, oldValue, newValue) {
-            if (name == 'title') {
+            if (name == 'title-text') {
                 if (newValue == null) {
                     this.shadowRoot.querySelector('#title>span').innerText = ''
                 } else {
